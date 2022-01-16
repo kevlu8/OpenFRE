@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenFRE", "OpenFRE\OpenFRE.vcxproj", "{01E58846-B54C-4EE4-8B1E-4F3618E09BF8}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenFRE.dll", "OpenFRE.dll\OpenFRE.dll.vcxproj", "{927765EB-C0BF-4708-B7C7-F9F84446420D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{01E58846-B54C-4EE4-8B1E-4F3618E09BF8}.Release|x64.Build.0 = Release|x64
 		{01E58846-B54C-4EE4-8B1E-4F3618E09BF8}.Release|x86.ActiveCfg = Release|Win32
 		{01E58846-B54C-4EE4-8B1E-4F3618E09BF8}.Release|x86.Build.0 = Release|Win32
+		{927765EB-C0BF-4708-B7C7-F9F84446420D}.Debug|x64.ActiveCfg = Debug|x64
+		{927765EB-C0BF-4708-B7C7-F9F84446420D}.Debug|x64.Build.0 = Debug|x64
+		{927765EB-C0BF-4708-B7C7-F9F84446420D}.Debug|x86.ActiveCfg = Debug|Win32
+		{927765EB-C0BF-4708-B7C7-F9F84446420D}.Debug|x86.Build.0 = Debug|Win32
+		{927765EB-C0BF-4708-B7C7-F9F84446420D}.Release|x64.ActiveCfg = Release|x64
+		{927765EB-C0BF-4708-B7C7-F9F84446420D}.Release|x64.Build.0 = Release|x64
+		{927765EB-C0BF-4708-B7C7-F9F84446420D}.Release|x86.ActiveCfg = Release|Win32
+		{927765EB-C0BF-4708-B7C7-F9F84446420D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

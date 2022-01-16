@@ -5,6 +5,7 @@
 
 Release/
 Debug/
+x64/
 *.pdb
 *.obj
 *.iobj

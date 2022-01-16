@@ -1,4 +1,3 @@
-#define HEADER_FILE
 #include "include.hpp"
 
 /* 
