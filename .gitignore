@@ -1,0 +1,10 @@
+.*
+.vs/
+!/.gitignore
+.git/
+
+Release/
+Debug/
+*.pdb
+*.obj
+*.iobj
