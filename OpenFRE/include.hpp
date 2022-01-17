@@ -5,3 +5,4 @@
 #include <string>
 #include <thread>
 #include <libloaderapi.h>
+#include <wingdi.h>
