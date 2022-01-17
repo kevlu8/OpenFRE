@@ -18,7 +18,7 @@ Displays error messages in case of injection failure, then exits the program
 
 @return None
 */
-void errorMsg(_In_ LPCSTR errorTitle, _In_ LPCWSTR errorMsg);
+void errorMsg(_In_ LPCSTR errorTitle, _In_ LPCSTR errorMsg);
 
 /*
 Checks to see if a file exists

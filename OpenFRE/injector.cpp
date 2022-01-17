@@ -18,17 +18,17 @@ bool inject() {
 	DWORD procID = NULL;
 	char dllPath[MAX_PATH];
 	const char* dllName = "OpenFRE.dll";
-	const char* windowTitle = /*L"Roblox"*/ "Untitled - Paint";
+	const char* windowTitle = "Roblox";
 
 	if (!fileExists(dllName))
-		errorMsg("DLL not found!", "OpenFRE.dll was not found. Please disable your antivirus or add OpenFRE to your exclusions.");
+		errorMsg("DLL not found", "OpenFRE.dll was not found. Please disable your antivirus or add OpenFRE to your exclusions.");
 
 	if (!GetFullPathName(dllName, MAX_PATH, dllPath, nullptr))
 		errorMsg("Failed to check full path of DLL", "Couldn't access the full path to OpenFRE.dll. Check to see if there is corruption in folder names.");
 
 	getProcID(windowTitle, procID);
 	if (procID == NULL)
-		errorMsg("Roblox not found.", "Couldn't find Roblox. Are you sure it's open?");
+		errorMsg("Roblox not found", "Couldn't find Roblox. Are you sure it's open?");
 
 	HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, NULL, procID);
 
@@ -50,6 +50,6 @@ bool inject() {
 
 	CloseHandle(hProcess);
 	VirtualFreeEx(hProcess, allocatedMemory, NULL, MEM_RELEASE);
-	MessageBox(NULL, "Successfully injected DLL into Roblox.", "Injected", MB_ICONINFORMATION | MB_OK);
+	//MessageBox(NULL, "Successfully injected DLL into Roblox.", "Injected", MB_ICONINFORMATION | MB_OK);
 	return true;
 }

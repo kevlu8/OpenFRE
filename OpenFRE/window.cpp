@@ -1,14 +1,12 @@
 #include "window.hpp"
 
 bool createWindow(_In_ HINSTANCE hInstance) {
-	//const wchar_t CLASS_NAME[] = L"OpenFRE Script Injector";
-	LPCSTR CLASS_NAME = "OpenFRE Script Injector";
 
 	WNDCLASS wc = {};
 
 	wc.lpfnWndProc = WindowProcHomemade;
 	wc.hInstance = hInstance;
-	wc.lpszClassName = CLASS_NAME;
+	wc.lpszClassName = "OpenFRE Script Injector";
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
 
@@ -16,10 +14,10 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 	
 	HWND hwnd = CreateWindowExW(
 		0,
-		(LPCWSTR)CLASS_NAME,
+		L"OpenFRE Script Injector",
 		L"OpenFRE Executor",
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | BS_DEFPUSHBUTTON,
+		CW_USEDEFAULT, CW_USEDEFAULT, 600, 300,
 		NULL,
 		NULL,
 		hInstance,
@@ -43,7 +41,7 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 
 bool paintWindow(_In_ HWND hwnd) {
 	// do stuff here
-	return false;
+	return true;
 }
 
 LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM wp, _In_ LPARAM lp) {
