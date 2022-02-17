@@ -86,12 +86,14 @@ LRESULT CALLBACK SubProcHomemade(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
 		ev.hwndTrack = hwnd;
 		ev.dwHoverTime = HOVER_DEFAULT;
 		TrackMouseEvent(&ev);
+		break;
 	}
 	case WM_MOUSEHOVER: {
 		HDC hdc = GetDC(hwnd);
 		SetDCBrushColor(hdc, RGB(20, 20, 20));
 
 		Rectangle(hdc, 200, 200, 250, 225);
+		break;
 	}
 	case WM_MOUSELEAVE: {
 		HDC hdc = GetDC(hwnd);
@@ -106,17 +108,21 @@ LRESULT CALLBACK SubProcHomemade(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
 		ev.hwndTrack = hwnd;
 		ev.dwHoverTime = HOVER_DEFAULT;
 		TrackMouseEvent(&ev);
+		break;
 	}
 	}
 	return DefWindowProc(hwnd, msg, wp, lp);
 }
 
+// Definition of Pos
 Pos::Pos(int x, int y) {
 	this->x = x;
 	this->y = y;
 };
 
 button::button(Pos* pos1, Pos* pos2) {
+	this->buttonColor = { 0x000000 };
+	this->hdc = NULL;
 	this->origin = pos1;
 	this->farPoint = pos2;
 }
