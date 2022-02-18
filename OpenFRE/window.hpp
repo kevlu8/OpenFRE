@@ -26,6 +26,7 @@ bool createWindow(_In_ HINSTANCE hInstance);
 
 /*
 Attempt to invalidate if required the window client area.
+@param hwnd The handle to the window.
 */
 void invalidateAttempt(_In_ HWND hwnd);
 
@@ -47,6 +48,7 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 
 /*
 Attempt to click on button.
+@param hwnd The handle to the window.
 */
 void attemptClick(_In_ HWND hwnd);
 
@@ -104,10 +106,17 @@ public:
 
 /*
 Register button for further repaints.
+
+@param buttonToReg The button to be registred.
 */
 void registerButton(_In_ button buttonToReg);
 
 /*
 Checks if the mouse is in the given button.
+
+@param toTest The button we want to check if mouse is inside.
+@param mx The X of the mouse for tests.
+@param my The Y of the mouse for tests.
+@return If the mouse is inside the button.
 */
 bool isMouseInButton(_In_ button toTest, _In_ LONG mx, _In_ LONG my);

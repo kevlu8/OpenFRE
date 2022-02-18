@@ -56,8 +56,10 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 	exitBtn.buttonColor = 0x282828;
 	exitBtn.functionClicked = [&]() { DestroyWindow(hwnd); };
 
+	// REGISTRATIONS - START
 	registerButton(injectBtn);
 	registerButton(exitBtn);
+	// REGISTRATIONS - END
 
 	ShowWindow(hwnd, SW_SHOWNORMAL);
 
