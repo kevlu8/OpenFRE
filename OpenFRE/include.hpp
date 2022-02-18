@@ -16,8 +16,10 @@
 #pragma once
 
 #include <Windows.h>
+#include <Windowsx.h>
 #include <iostream>
 #include <string>
+#include <functional>
 #include <thread>
 #include <libloaderapi.h>
 #include <wingdi.h>

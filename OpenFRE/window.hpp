@@ -14,6 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "include.hpp"
+#include "injector.hpp"
 
 /* 
 Creates a blank window.
@@ -23,10 +24,17 @@ Creates a blank window.
 */
 bool createWindow(_In_ HINSTANCE hInstance);
 
+/*
+Attempt to invalidate if required the window client area.
+@param hwnd The handle to the window.
+*/
+void invalidateAttempt(_In_ HWND hwnd);
+
 /* 
 Paints the window
 
 @param hwnd	The handle to the window
+@param goodDc The handle to the DC.
 @return True if success, false if error
 */
 bool paintWindow(_In_ HWND hwnd);
@@ -37,6 +45,12 @@ Callback for WindowProc
 @param Don't worry about it.
 */
 LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM wp, _In_ LPARAM lp);
+
+/*
+Attempt to click on button.
+@param hwnd The handle to the window.
+*/
+void attemptClick(_In_ HWND hwnd);
 
 /*
 Class for position. Includes x and y value
@@ -56,15 +70,53 @@ class button {
 protected:
 	Pos* origin;
 	Pos* farPoint;
+
+	HBRUSH brushNormal;
+	HBRUSH brushHovered;
+
+	COLORREF colorNormal;
+	COLORREF colorHovered;
+
+	LPCWSTR buttonText;
+
+	RECT buttonRect;
+
 public:
+
+	std::function<void()> functionClicked;
+
 	COLORREF buttonColor;
-	HDC hdc;
 
-	button(Pos* pos1, Pos* pos2);
+	button(Pos* pos1, Pos* pos2, LPCWSTR text);
 
-	void draw();
+	button(); // Default Constructor.
 
-	void hover();
+	void draw(_In_ HDC hdc);
 
-	void press(void (*function)());
+	void hover(_In_ HDC hdc);
+
+	void press();
+
+	Pos* getPosOrigin();
+
+	Pos* getPosFarPoint();
+
+	RECT* getRect();
 };
+
+/*
+Register button for further repaints.
+
+@param buttonToReg The button to be registred.
+*/
+void registerButton(_In_ button buttonToReg);
+
+/*
+Checks if the mouse is in the given button.
+
+@param toTest The button we want to check if mouse is inside.
+@param mx The X of the mouse for tests.
+@param my The Y of the mouse for tests.
+@return If the mouse is inside the button.
+*/
+bool isMouseInButton(_In_ button toTest, _In_ LONG mx, _In_ LONG my);

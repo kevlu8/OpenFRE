@@ -17,14 +17,16 @@
 #include "injector.hpp"
 #include "window.hpp"
 
-INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, INT nCmdShow) {
-	HANDLE wndThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)createWindow, &hInstance, NULL, NULL);
-	
-	if (!wndThread)
+int WINAPI WinMain(
+	_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPSTR lpCmdLine,
+	_In_ int nShowCmd
+) {
+	bool result = createWindow(hInstance);
+
+	if (!result)
 		errorMsg("Failed to create window", "We couldn't create the window. Please report this as an issue on the GitHub repository.");
 
-	Sleep(60000);
-
-	inject();
 	return 0;
 }
