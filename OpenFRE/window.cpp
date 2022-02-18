@@ -15,6 +15,14 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "window.hpp"
 
+const int MAX_BUTTONS = 16;
+
+int curTrackLen = 0;
+button buttons[MAX_BUTTONS];
+bool isDrawing = false;
+
+
+
 bool createWindow(_In_ HINSTANCE hInstance) {
 
 	WNDCLASS wc = {};
@@ -42,6 +50,12 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 	if (hwnd == NULL) {
 		return false;
 	}
+	Pos buttonPosition(200, 200);
+	Pos buttonFarPoint(300, 225);
+	button injectBtn(&buttonPosition, &buttonFarPoint, L"Inject !");
+	injectBtn.buttonColor = 0x282828;
+	injectBtn.functionClicked = &inject;
+	registerButton(injectBtn);
 
 	ShowWindow(hwnd, SW_SHOWNORMAL);
 
@@ -54,21 +68,88 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 	return true;
 }
 
+bool isMouseInButton(_In_ button toTest, _In_ LONG mx, _In_ LONG my) {
+	return 
+		mx > toTest.getPosOrigin()->x and // x check start
+		mx < toTest.getPosFarPoint()->x and // x check end
+		my > toTest.getPosOrigin()->y and // y check start
+		my < toTest.getPosFarPoint()->y; // y check end
+	//---------------------------------------
+}
+
 bool paintWindow(_In_ HWND hwnd) {
-	Pos buttonPosition(200, 200);
-	Pos buttonFarPoint(250, 225);
-	button inject(&buttonPosition, &buttonFarPoint);
-	inject.buttonColor = { 0x282828 };
-	inject.hdc = GetDC(hwnd);
-	inject.draw();
+	POINT cursorPos = {};
+	PAINTSTRUCT ps;
+	HDC hdc = BeginPaint(hwnd, &ps);
+	FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+	if (GetCursorPos(&cursorPos) && ScreenToClient(hwnd, &cursorPos)) {
+		for (button toDraw : buttons) {
+			if (!isMouseInButton(toDraw, cursorPos.x, cursorPos.y)) {
+				toDraw.draw(hdc);
+			} else {
+				toDraw.hover(hdc);
+			}
+		}
+	}
+	EndPaint(hwnd, &ps);
+	ReleaseDC(hwnd, hdc);
+	
 	return true;
+}
+
+void invalidateAttempt(_In_ HWND hwnd) {
+	POINT cursorPos = {};
+	if (GetCursorPos(&cursorPos) && ScreenToClient(hwnd, &cursorPos)) {
+		for (button toDraw : buttons) {
+			LPRECT tdRect = toDraw.getRect();
+			if (!isMouseInButton(toDraw, cursorPos.x, cursorPos.y)) {
+				InvalidateRect(hwnd, tdRect, true);
+			}
+			else {
+				InvalidateRect(hwnd, tdRect, true);
+			}
+		}
+	}
+}
+
+void attemptClick(_In_ HWND hwnd) {
+	POINT cursorPos = {};
+	if (GetCursorPos(&cursorPos) && ScreenToClient(hwnd, &cursorPos)) {
+		for (button toDraw : buttons) {
+			LPRECT tdRect = toDraw.getRect();
+			if (isMouseInButton(toDraw, cursorPos.x, cursorPos.y)) {
+				toDraw.press();
+			}
+		}
+	}
 }
 
 LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM wp, _In_ LPARAM lp) {
 	switch (msg) {
-	case WM_PAINT:
-		paintWindow(hwnd);
+	case WM_PAINT: {
+		if (!isDrawing) {
+			isDrawing = true;
+			paintWindow(hwnd);
+			isDrawing = false;
+		}
 		return 0;
+	}
+	case WM_MOUSEMOVE: {
+		if (!isDrawing) {
+			isDrawing = true;
+			invalidateAttempt(hwnd);
+			isDrawing = false;
+		}
+		return 0;
+	}
+	case WM_LBUTTONDOWN: {
+		if (!isDrawing) {
+			isDrawing = true;
+			attemptClick(hwnd);
+			isDrawing = false;
+		}
+		return 0;
+	}
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
@@ -77,41 +158,12 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 	}
 }
 
-LRESULT CALLBACK SubProcHomemade(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
-	switch (msg) {
-	case WM_MOUSEMOVE: {
-		TRACKMOUSEEVENT ev = {};
-		ev.cbSize = sizeof(TRACKMOUSEEVENT);
-		ev.dwFlags = TME_HOVER | TME_LEAVE;
-		ev.hwndTrack = hwnd;
-		ev.dwHoverTime = HOVER_DEFAULT;
-		TrackMouseEvent(&ev);
-		break;
+void registerButton(_In_ button buttonToReg) {
+	if (curTrackLen + 1 >= MAX_BUTTONS) {
+		errorMsg("Buttons", "Too many buttons registred.");
 	}
-	case WM_MOUSEHOVER: {
-		HDC hdc = GetDC(hwnd);
-		SetDCBrushColor(hdc, RGB(20, 20, 20));
-
-		Rectangle(hdc, 200, 200, 250, 225);
-		break;
-	}
-	case WM_MOUSELEAVE: {
-		HDC hdc = GetDC(hwnd);
-		SetDCBrushColor(hdc, RGB(0, 255, 0));
-
-		SelectObject(hdc, GetStockObject(DC_BRUSH));
-
-		Rectangle(hdc, 200, 200, 250, 225);
-		TRACKMOUSEEVENT ev = {};
-		ev.cbSize = sizeof(TRACKMOUSEEVENT);
-		ev.dwFlags = TME_HOVER | TME_LEAVE | TME_CANCEL;
-		ev.hwndTrack = hwnd;
-		ev.dwHoverTime = HOVER_DEFAULT;
-		TrackMouseEvent(&ev);
-		break;
-	}
-	}
-	return DefWindowProc(hwnd, msg, wp, lp);
+	buttons[curTrackLen] = buttonToReg;
+	curTrackLen = curTrackLen + 1;
 }
 
 // Definition of Pos
@@ -120,22 +172,67 @@ Pos::Pos(int x, int y) {
 	this->y = y;
 };
 
-button::button(Pos* pos1, Pos* pos2) {
-	this->buttonColor = { 0x000000 };
-	this->hdc = NULL;
+// ******************************************
+// DEFINITION OF BUTTON CLASS    -    START
+// ******************************************
+
+void empty() {
+
+}
+
+button::button(Pos* pos1, Pos* pos2, LPCWSTR text) {
+	this->buttonColor = 0x000000;
+	this->buttonText = text;
+	this->functionClicked = &empty;
 	this->origin = pos1;
 	this->farPoint = pos2;
+	this->colorNormal = this->buttonColor;
+	this->brushNormal = CreateSolidBrush(this->colorNormal);
+	this->colorHovered = RGB(GetRValue(this->buttonColor) + 70, GetGValue(this->buttonColor) + 70, GetBValue(this->buttonColor) + 70);
+	this->brushHovered = CreateSolidBrush(colorHovered);
+	RECT tdRect = {};
+	tdRect.left = pos1->x;
+	tdRect.right = pos2->x;
+	tdRect.top = pos1->y;
+	tdRect.bottom = pos2->y;
+	this->buttonRect = tdRect;
 }
 
-void button::draw() {
-	SelectObject(button::hdc, CreateSolidBrush(button::buttonColor));
-	Rectangle(hdc, this->origin->x, this->origin->y, this->farPoint->x, farPoint->y);
+button::button() : button(new Pos(0, 0), new Pos(0, 0), L"") {} // default constructor
+
+
+void button::draw(_In_ HDC hdc) {
+	SelectObject(hdc, this->brushNormal);
+	Rectangle(hdc, this->origin->x, this->origin->y, this->farPoint->x, this->farPoint->y);
+	SetBkColor(hdc, this->colorNormal);
+	SetTextColor(hdc, 0xffffff);
+	DrawTextW(hdc, this->buttonText, -1, &this->buttonRect, DT_CENTER || DT_NOCLIP);
 }
 
-void button::hover() {
-	Rectangle(hdc, this->origin->x, this->origin->y, this->farPoint->x, farPoint->y);
+void button::hover(_In_ HDC hdc) {
+	SelectObject(hdc, this->brushHovered);
+	Rectangle(hdc, this->origin->x, this->origin->y, this->farPoint->x, this->farPoint->y);
+	SetBkColor(hdc, this->colorHovered);
+	SetTextColor(hdc, 0xffffff);
+	DrawTextW(hdc, this->buttonText, -1, &this->buttonRect, DT_CENTER || DT_NOCLIP);
 }
 
-void button::press(void (*function)()) {
-	function();
+void button::press() {
+	functionClicked();
 }
+
+Pos* button::getPosOrigin() {
+	return this->origin;
+}
+
+Pos* button::getPosFarPoint() {
+	return this->farPoint;
+}
+
+RECT* button::getRect() {
+	return &this->buttonRect;
+}
+
+// ******************************************
+// DEFINITION OF BUTTON CLASS    -    END
+// ******************************************

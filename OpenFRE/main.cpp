@@ -23,13 +23,10 @@ int WINAPI WinMain(
 	_In_ LPSTR lpCmdLine,
 	_In_ int nShowCmd
 ) {
-	HANDLE wndThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)createWindow, &hInstance, NULL, NULL);
+	bool result = createWindow(hInstance);
 
-	if (!wndThread)
+	if (!result)
 		errorMsg("Failed to create window", "We couldn't create the window. Please report this as an issue on the GitHub repository.");
 
-	Sleep(60000);
-
-	inject();
 	return 0;
 }
