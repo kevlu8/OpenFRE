@@ -21,8 +21,6 @@ int curTrackLen = 0;
 button buttons[MAX_BUTTONS];
 bool isDrawing = false;
 
-
-
 bool createWindow(_In_ HINSTANCE hInstance) {
 
 	WNDCLASS wc = {};
@@ -50,12 +48,16 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 	if (hwnd == NULL) {
 		return false;
 	}
-	Pos buttonPosition(200, 200);
-	Pos buttonFarPoint(300, 225);
-	button injectBtn(&buttonPosition, &buttonFarPoint, L"Inject !");
+	button injectBtn(new Pos(200, 200), new Pos(300, 225), L"Inject !");
 	injectBtn.buttonColor = 0x282828;
 	injectBtn.functionClicked = &inject;
+
+	button exitBtn(new Pos(100, 200), new Pos(190, 225), L"Exit");
+	exitBtn.buttonColor = 0x282828;
+	exitBtn.functionClicked = [&]() { DestroyWindow(hwnd); };
+
 	registerButton(injectBtn);
+	registerButton(exitBtn);
 
 	ShowWindow(hwnd, SW_SHOWNORMAL);
 
