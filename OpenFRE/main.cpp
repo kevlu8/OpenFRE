@@ -13,10 +13,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#define OPENFRE_VERSION 0.1.0
+
 #include "include.hpp"
+
 #include "injector.hpp"
 #include "window.hpp"
+#include "utils.hpp"
 
 int WINAPI WinMain(
 	_In_ HINSTANCE hInstance,
@@ -24,29 +26,15 @@ int WINAPI WinMain(
 	_In_ LPSTR lpCmdLine,
 	_In_ int nShowCmd
 ) {
-	// Check for a new version of OpenFRE on GitHub under the "releases" tab
-	cpr::Response response = cpr::Get(cpr::Url{"https://api.github.com/repos/kevlu8/OpenFRE/releases/latest"});
-	if (response.status_code == 200) {
-		std::string latest_version = response.text;
-		if (latest_version.find("\"tag_name\":\"v") != std::string::npos) {
-			latest_version = latest_version.substr(latest_version.find("\"tag_name\":\"v") + 12);
-			latest_version = latest_version.substr(0, latest_version.find("\""));
-			if (latest_version != OPENFRE_VERSION) {
-				MESSAGEBOXPARAMS params = {};
-				params.cbSize = sizeof(MESSAGEBOXPARAMS);
-				params.hInstance = GetModuleHandle(NULL);
-				params.hwndOwner = NULL;
-				params.lpszText = "OpenFRE is out of date. Current version: " + OPENFRE_VERSION + "\nLatest version: " + latest_version + "\n\nUpdating OpenFRE in the background...";
-				params.lpszCaption = "Updating OpenFRE";
-				params.dwStyle = MB_OK | MB_ICONINFORMATION;
-				CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)MessageBoxIndirect, &params, 0, NULL);
-				auto updateThread = []() {
-					
-				}
-			}
-		}
-	} else {
-		errorMsg("Failed to check for a new version of OpenFRE. Please make sure you're connected to the internet. If you are, please report this as an issue on the GitHub repository.");
+	HANDLE update = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)updateProgram, NULL, NULL, NULL);
+	DWORD exitCode = 2;
+	while (!((exitCode == 1) || (exitCode == 0) || (exitCode == 2))) {
+		GetExitCodeThread(update, &exitCode);
+		Sleep(100);
+	}
+
+	if (exitCode == 1) {
+		exit(0);
 	}
 	
 	bool result = createWindow(hInstance);
