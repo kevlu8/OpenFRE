@@ -15,11 +15,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "window.hpp"
 
-const int MAX_BUTTONS = 16;
-
-int curTrackLen = 0;
-button buttons[MAX_BUTTONS];
-bool isDrawing = false;
+HWND runBtn = NULL;
+HWND exitBtn = NULL;
+HWND injectBtn = NULL;
+HWND inputText = NULL;
 
 bool createWindow(_In_ HINSTANCE hInstance) {
 
@@ -45,23 +44,29 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 		NULL
 	);
 
+
 	if (hwnd == NULL) {
 		return false;
 	}
-	button injectBtn(new Pos(200, 200), new Pos(300, 225), L"Inject !");
-	injectBtn.buttonColor = 0x282828;
-	injectBtn.functionClicked = &inject;
 
-	button exitBtn(new Pos(100, 200), new Pos(190, 225), L"Exit");
-	exitBtn.buttonColor = 0x282828;
-	exitBtn.functionClicked = [&]() { DestroyWindow(hwnd); };
+	inputText = CreateWindowW(L"Edit", L"print(\"Hello World !\")", WS_BORDER | WS_VISIBLE | WS_CHILD | ES_MULTILINE | WS_VSCROLL, 0, 0, 500, 200, hwnd, NULL, hInstance, NULL);
+	
+	if (inputText == NULL) {
+		return false;
+	}
 
-	// REGISTRATIONS - START
-	registerButton(injectBtn);
-	registerButton(exitBtn);
-	// REGISTRATIONS - END
+	runBtn = CreateWindowW(L"Button", L"Run", WS_BORDER | WS_VISIBLE | WS_CHILD, 10, 210, 80, 30, hwnd, NULL, hInstance, NULL);
+	exitBtn = CreateWindowW(L"Button", L"Exit", WS_BORDER | WS_VISIBLE | WS_CHILD, 100, 210, 80, 30, hwnd, NULL, hInstance, NULL);
+	injectBtn = CreateWindowW(L"Button", L"Inject", WS_BORDER | WS_VISIBLE | WS_CHILD, 190, 210, 80, 30, hwnd, NULL, hInstance, NULL);
+
+	if (runBtn == NULL || exitBtn == NULL || injectBtn == NULL) {
+		return false;
+	}
+
+	EnableWindow(runBtn, FALSE);
 
 	ShowWindow(hwnd, SW_SHOWNORMAL);
+	UpdateWindow(hwnd);
 
 	MSG msg = {};
 	while (GetMessage(&msg, NULL, 0, 0)) {
@@ -72,85 +77,47 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 	return true;
 }
 
-bool isMouseInButton(_In_ button toTest, _In_ LONG mx, _In_ LONG my) {
-	return 
-		mx > toTest.getPosOrigin()->x and // x check start
-		mx < toTest.getPosFarPoint()->x and // x check end
-		my > toTest.getPosOrigin()->y and // y check start
-		my < toTest.getPosFarPoint()->y; // y check end
-	//---------------------------------------
-}
-
-bool paintWindow(_In_ HWND hwnd) {
-	POINT cursorPos = {};
-	PAINTSTRUCT ps;
-	HDC hdc = BeginPaint(hwnd, &ps);
-	FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
-	if (GetCursorPos(&cursorPos) && ScreenToClient(hwnd, &cursorPos)) {
-		for (button toDraw : buttons) {
-			if (!isMouseInButton(toDraw, cursorPos.x, cursorPos.y)) {
-				toDraw.draw(hdc);
-			} else {
-				toDraw.hover(hdc);
-			}
-		}
-	}
-	EndPaint(hwnd, &ps);
-	ReleaseDC(hwnd, hdc);
-	
-	return true;
-}
-
-void invalidateAttempt(_In_ HWND hwnd) {
-	POINT cursorPos = {};
-	if (GetCursorPos(&cursorPos) && ScreenToClient(hwnd, &cursorPos)) {
-		for (button toDraw : buttons) {
-			LPRECT tdRect = toDraw.getRect();
-			if (!isMouseInButton(toDraw, cursorPos.x, cursorPos.y)) {
-				InvalidateRect(hwnd, tdRect, true);
-			}
-			else {
-				InvalidateRect(hwnd, tdRect, true);
-			}
-		}
-	}
-}
-
-void attemptClick(_In_ HWND hwnd) {
-	POINT cursorPos = {};
-	if (GetCursorPos(&cursorPos) && ScreenToClient(hwnd, &cursorPos)) {
-		for (button toDraw : buttons) {
-			LPRECT tdRect = toDraw.getRect();
-			if (isMouseInButton(toDraw, cursorPos.x, cursorPos.y)) {
-				toDraw.press();
-			}
-		}
-	}
-}
-
 LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM wp, _In_ LPARAM lp) {
 	switch (msg) {
 	case WM_PAINT: {
-		if (!isDrawing) {
-			isDrawing = true;
-			paintWindow(hwnd);
-			isDrawing = false;
-		}
+		PAINTSTRUCT paintStruct = {};
+		HDC hdc = BeginPaint(hwnd, &paintStruct);
+		FillRect(hdc, &paintStruct.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+		EndPaint(hwnd, &paintStruct);
 		return 0;
 	}
-	case WM_MOUSEMOVE: {
-		if (!isDrawing) {
-			isDrawing = true;
-			invalidateAttempt(hwnd);
-			isDrawing = false;
+	case WM_COMMAND: {
+		switch (HIWORD(wp)) {
+		case BN_CLICKED: {
+			HWND btn = (HWND)lp;
+			if (btn == exitBtn) {
+				DestroyWindow(hwnd);
+			}
+			if (btn == injectBtn) {
+				EnableWindow(exitBtn, FALSE);
+				EnableWindow(injectBtn, FALSE);
+				if (!inject()) {
+					MessageBoxW(hwnd, L"Failed to inject Roblox. Make sure it is opened.", L"Failed to inject", MB_OK | MB_ICONERROR);
+					EnableWindow(injectBtn, TRUE);
+				}
+				else {
+					EnableWindow(runBtn, TRUE);
+				}
+				EnableWindow(exitBtn, TRUE);
+			}
+			if (btn == runBtn) {
+				int codeLength = GetWindowTextLengthW(inputText);
+				LPWSTR buff = (LPWSTR)VirtualAlloc(NULL, (SIZE_T)codeLength + 1, MEM_COMMIT, PAGE_READWRITE);
+				if (buff != NULL) {
+					GetWindowTextW(inputText, buff, codeLength + 1);
+					// implement so code-run here.
+					MessageBoxW(hwnd, buff, L"Code", MB_OK | MB_ICONINFORMATION);
+				}
+			}
+			return 0;
 		}
-		return 0;
-	}
-	case WM_LBUTTONDOWN: {
-		if (!isDrawing) {
-			isDrawing = true;
-			attemptClick(hwnd);
-			isDrawing = false;
+		default:
+			break;
 		}
 		return 0;
 	}
@@ -161,82 +128,3 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 		return DefWindowProc(hwnd, msg, wp, lp);
 	}
 }
-
-void registerButton(_In_ button buttonToReg) {
-	if (curTrackLen + 1 >= MAX_BUTTONS) {
-		errorMsg("Buttons", "Too many buttons registred.");
-	}
-	buttons[curTrackLen] = buttonToReg;
-	curTrackLen = curTrackLen + 1;
-}
-
-// Definition of Pos
-Pos::Pos(int x, int y) {
-	this->x = x;
-	this->y = y;
-};
-
-// ******************************************
-// DEFINITION OF BUTTON CLASS    -    START
-// ******************************************
-
-void empty() {
-
-}
-
-button::button(Pos* pos1, Pos* pos2, LPCWSTR text) {
-	this->buttonColor = 0x000000;
-	this->buttonText = text;
-	this->functionClicked = &empty;
-	this->origin = pos1;
-	this->farPoint = pos2;
-	this->colorNormal = this->buttonColor;
-	this->brushNormal = CreateSolidBrush(this->colorNormal);
-	this->colorHovered = RGB(GetRValue(this->buttonColor) + 70, GetGValue(this->buttonColor) + 70, GetBValue(this->buttonColor) + 70);
-	this->brushHovered = CreateSolidBrush(colorHovered);
-	RECT tdRect = {};
-	tdRect.left = pos1->x;
-	tdRect.right = pos2->x;
-	tdRect.top = pos1->y;
-	tdRect.bottom = pos2->y;
-	this->buttonRect = tdRect;
-}
-
-button::button() : button(new Pos(0, 0), new Pos(0, 0), L"") {} // default constructor
-
-
-void button::draw(_In_ HDC hdc) {
-	SelectObject(hdc, this->brushNormal);
-	Rectangle(hdc, this->origin->x, this->origin->y, this->farPoint->x, this->farPoint->y);
-	SetBkColor(hdc, this->colorNormal);
-	SetTextColor(hdc, 0xffffff);
-	DrawTextW(hdc, this->buttonText, -1, &this->buttonRect, DT_CENTER || DT_NOCLIP);
-}
-
-void button::hover(_In_ HDC hdc) {
-	SelectObject(hdc, this->brushHovered);
-	Rectangle(hdc, this->origin->x, this->origin->y, this->farPoint->x, this->farPoint->y);
-	SetBkColor(hdc, this->colorHovered);
-	SetTextColor(hdc, 0xffffff);
-	DrawTextW(hdc, this->buttonText, -1, &this->buttonRect, DT_CENTER || DT_NOCLIP);
-}
-
-void button::press() {
-	functionClicked();
-}
-
-Pos* button::getPosOrigin() {
-	return this->origin;
-}
-
-Pos* button::getPosFarPoint() {
-	return this->farPoint;
-}
-
-RECT* button::getRect() {
-	return &this->buttonRect;
-}
-
-// ******************************************
-// DEFINITION OF BUTTON CLASS    -    END
-// ******************************************
