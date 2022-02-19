@@ -45,9 +45,17 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 		NULL
 	);
 
+
 	if (hwnd == NULL) {
 		return false;
 	}
+
+	HWND inputText = CreateWindowW(L"Edit", L"print(\"Hello World !\")", WS_BORDER | WS_VISIBLE | WS_CHILD | ES_MULTILINE | WS_VSCROLL, 0, 0, 500, 200, hwnd, NULL, hInstance, NULL);
+
+	if (inputText == NULL) {
+		return false;
+	}
+
 	button injectBtn(new Pos(200, 200), new Pos(300, 225), L"Inject !");
 	injectBtn.buttonColor = 0x282828;
 	injectBtn.functionClicked = &inject;
@@ -56,9 +64,21 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 	exitBtn.buttonColor = 0x282828;
 	exitBtn.functionClicked = [&]() { DestroyWindow(hwnd); };
 
+	button runBtn(new Pos(20, 200), new Pos(90, 225), L"Run");
+	runBtn.buttonColor = 0x282828;
+	runBtn.functionClicked = [&]() { 
+		int textLength = GetWindowTextLengthW(inputText);
+		PWSTR textBuff = (PWSTR)VirtualAlloc(NULL, (SIZE_T)textLength + (SIZE_T)1, MEM_COMMIT, PAGE_READWRITE);
+		if (textBuff != NULL) {
+			GetWindowTextW(inputText, textBuff, textLength + 1);
+			MessageBoxW(hwnd, textBuff, L"Code", MB_OK | MB_ICONWARNING);
+		}
+	};
+
 	// REGISTRATIONS - START
 	registerButton(injectBtn);
 	registerButton(exitBtn);
+	registerButton(runBtn);
 	// REGISTRATIONS - END
 
 	ShowWindow(hwnd, SW_SHOWNORMAL);
@@ -180,14 +200,10 @@ Pos::Pos(int x, int y) {
 // DEFINITION OF BUTTON CLASS    -    START
 // ******************************************
 
-void empty() {
-
-}
-
 button::button(Pos* pos1, Pos* pos2, LPCWSTR text) {
 	this->buttonColor = 0x000000;
 	this->buttonText = text;
-	this->functionClicked = &empty;
+	this->functionClicked = []() {};
 	this->origin = pos1;
 	this->farPoint = pos2;
 	this->colorNormal = this->buttonColor;

@@ -84,8 +84,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>C:\Users\Administrator\Desktop\cpr\build\lib\Release;C:\Users\Administrator\Desktop\cntk\cntk\;C:\Program Files\boost_1_78_0\lib64-msvc-14.3;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\cpr;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\cpr\bin;C:\Users\Administrator\Desktop\cpr\build\lib\Release;C:\Users\Administrator\Desktop\cntk\cntk\;C:\Program Files\boost_1_78_0\lib64-msvc-14.3;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\cpr\include;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\cpr;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <VcpkgUseStatic>true</VcpkgUseStatic>
@@ -165,6 +165,9 @@
     <ClInclude Include="injector.hpp" />
     <ClInclude Include="utils.hpp" />
     <ClInclude Include="window.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

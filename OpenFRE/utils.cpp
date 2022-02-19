@@ -31,7 +31,9 @@ INT updateProgram() {
 				execInfo.nShow = SW_HIDE;
 				execInfo.hInstApp = NULL;
 				ShellExecuteEx(&execInfo);
-				CloseHandle(execInfo.hProcess);
+				if (execInfo.hProcess != NULL) {
+					CloseHandle(execInfo.hProcess);
+				}
 				return 1;
 			}
 			else return 0;
@@ -41,4 +43,5 @@ INT updateProgram() {
 		errorMsg("Failed to check for update", "Failed to check for a new version of OpenFRE. Please make sure you're connected to the internet. If you are, please report this as an issue on the GitHub repository.");
 		return -1;
 	}
+	return 0;
 }
