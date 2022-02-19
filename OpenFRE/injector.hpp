@@ -38,6 +38,8 @@ bool fileExists(_In_ std::string fileName);
 /*
 Main function, injects DLL into Roblox memory
 
+@param Reference to a handle for the thread
+
 @return True if success, false if error.
 */
-bool inject();
+bool inject(HANDLE &hThread);

@@ -28,7 +28,7 @@ int WINAPI WinMain(
 ) {
 	HANDLE update = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)updateProgram, NULL, NULL, NULL);
 	DWORD exitCode = 3;
-	while (!((exitCode == 1) || (exitCode == 0) || (exitCode == 2))) {
+	while (exitCode != 1 && exitCode != 2 && exitCode != 0) {
 		GetExitCodeThread(update, &exitCode);
 		Sleep(100);
 	}

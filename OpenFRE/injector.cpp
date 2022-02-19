@@ -24,7 +24,7 @@ bool fileExists(_In_ std::string fileName) {
 	return (stat(fileName.c_str(), &buffer) == 0);
 }
 
-bool inject() {
+bool inject(_Out_ HANDLE &hThread) {
 	DWORD procID = NULL;
 	char dllPath[MAX_PATH];
 	const char* dllName = "OpenFRE.dll";
@@ -53,13 +53,12 @@ bool inject() {
 	if (!WriteProcessMemory(hProcess, allocatedMemory, dllPath, MAX_PATH, nullptr))
 		return false;
 
-	HANDLE hThread = CreateRemoteThread(hProcess, /*nullptr*/NULL, NULL, LPTHREAD_START_ROUTINE(LoadLibraryA), allocatedMemory, NULL, /*nullptr*/NULL);
+	hThread = CreateRemoteThread(hProcess, NULL, NULL, LPTHREAD_START_ROUTINE(LoadLibraryA), allocatedMemory, NULL, NULL);
 
 	if (!hThread)
 		return false;
 
 	VirtualFreeEx(hProcess, allocatedMemory, NULL, MEM_RELEASE);
 	CloseHandle(hProcess);
-	//MessageBox(NULL, "Successfully injected DLL into Roblox.", "Injected", MB_ICONINFORMATION | MB_OK);
 	return true;
 }

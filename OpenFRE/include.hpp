@@ -26,3 +26,5 @@
 #include <libloaderapi.h>
 #include <wingdi.h>
 #include <cpr/cpr.h>
+#include <map>
+#include <lua.hpp>

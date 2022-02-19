@@ -83,6 +83,37 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 		PAINTSTRUCT paintStruct = {};
 		HDC hdc = BeginPaint(hwnd, &paintStruct);
 		FillRect(hdc, &paintStruct.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+
+		int codeLength = GetWindowTextLengthW(inputText);
+		LPWSTR buff = (LPWSTR)VirtualAlloc(NULL, (SIZE_T)codeLength + 1, MEM_COMMIT, PAGE_READWRITE);
+		GetWindowTextW(inputText, buff, codeLength + 1);
+		std::map<std::string, unsigned int> markdownSyntax = {
+			{ "and", 0xff0000 },
+			{ "break", 0xff0000 },
+			{ "do", 0xff0000 },
+			{ "else", 0xff0000 },
+			{ "elseif", 0xff0000 },
+			{ "end", 0xff0000 },
+			{ "false", 0x0000ff },
+			{ "for", 0xff0000 },
+			{ "function", 0x0000ff },
+			{ "if", 0xff0000 },
+			{ "in", 0xff0000 },
+			{ "local", 0xff0000 },
+			{ "nil", 0xff0000 },
+			{ "not", 0xff0000 },
+			{ "or", 0xff0000 },
+			{ "repeat", 0xff0000 },
+			{ "return", 0xff0000 },
+			{ "then", 0xff0000 },
+			{ "true", 0x0000ff }, 
+			{ "until", 0xff0000 },
+			{ "while", 0xff0000 },
+			// other
+			{ "numbers", 0x00ff00 },
+		};
+		// somehow implement markdown syntax
+
 		EndPaint(hwnd, &paintStruct);
 		return 0;
 	}
@@ -96,13 +127,20 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 			if (btn == injectBtn) {
 				EnableWindow(exitBtn, FALSE);
 				EnableWindow(injectBtn, FALSE);
-				if (!inject()) {
-					MessageBoxW(hwnd, L"Failed to inject Roblox. Make sure it is opened.", L"Failed to inject", MB_OK | MB_ICONERROR);
+				HANDLE dllProc = NULL;
+				if (!inject(dllProc)) {
+					MessageBoxW(hwnd, L"Failed to inject code into Roblox. Please make sure it is open.", L"Failed to inject", MB_OK | MB_ICONERROR);
 					EnableWindow(injectBtn, TRUE);
 				}
 				else {
 					EnableWindow(runBtn, TRUE);
 				}
+				
+				HANDLE pipe = CreateNamedPipeA("\\\\.\\pipe\openfrecomms", PIPE_ACCESS_DUPLEX, PIPE_TYPE_MESSAGE, 2, 256, 256, 0, NULL);
+
+				if (!pipe)
+					MessageBoxW(NULL, L"Communication between OpenFRE and Roblox could not be established. Please report this as an issue on the GitHub repository.", L"Failed to establish pipe", MB_OK | MB_ICONERROR);
+
 				EnableWindow(exitBtn, TRUE);
 			}
 			if (btn == runBtn) {

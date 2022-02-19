@@ -1,3 +1,7 @@
 - (Learn how to) Make working execution system
-- Touch up GUI and add textbox for execution
-- Make automatic update system - DONE | NOT TESTED
+- Touch up GUI
+	- Make keyboard shortcuts work in textbox: eg ctrl+c, ctrl+v, ctrl+a, ctrl+backspace
+	- Make markdown syntax
+- Display loading bar on startup
+- Somehow get communication between main executable and DLL (pipe??)
+- Fix "An unexpected error occured and Roblox needs to quit" / freezing on inject

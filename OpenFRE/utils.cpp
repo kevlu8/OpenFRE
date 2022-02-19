@@ -1,6 +1,6 @@
 #include "utils.hpp"
 
-INT updateProgram() {
+DWORD updateProgram() {
 	remove("openfre-updater.exe");
 	cpr::Response response = cpr::Get(cpr::Url{ "https://api.github.com/repos/kevlu8/OpenFRE/releases/latest" });
 	if (response.status_code == 200) {
@@ -38,6 +38,7 @@ INT updateProgram() {
 			}
 			else return 0;
 		}
+		else return 0;
 	}
 	else {
 		MessageBoxW(NULL, L"Failed to check for a new version of OpenFRE. Please make sure you're connected to the internet. If you are, please report this as an issue on the GitHub repository.", L"Failed to check for update", MB_OK | MB_ICONERROR);
