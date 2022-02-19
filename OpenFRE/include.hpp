@@ -23,3 +23,4 @@
 #include <thread>
 #include <libloaderapi.h>
 #include <wingdi.h>
+#include <cpr/cpr.h>
