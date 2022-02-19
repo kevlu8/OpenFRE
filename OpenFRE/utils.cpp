@@ -24,7 +24,7 @@ INT updateProgram() {
 				execInfo.cbSize = sizeof(SHELLEXECUTEINFO);
 				execInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
 				execInfo.hwnd = NULL;
-				execInfo.lpVerb = NULL;
+				execInfo.lpVerb = "open";
 				execInfo.lpFile = "openfre-updater.exe";
 				execInfo.lpParameters = "";
 				execInfo.lpDirectory = NULL;
@@ -41,7 +41,6 @@ INT updateProgram() {
 	}
 	else {
 		MessageBoxW(NULL, L"Failed to check for a new version of OpenFRE. Please make sure you're connected to the internet. If you are, please report this as an issue on the GitHub repository.", L"Failed to check for update", MB_OK | MB_ICONERROR);
-		return -1;
+		return 2;
 	}
-	return 0;
 }

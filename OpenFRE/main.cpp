@@ -27,7 +27,7 @@ int WINAPI WinMain(
 	_In_ int nShowCmd
 ) {
 	HANDLE update = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)updateProgram, NULL, NULL, NULL);
-	DWORD exitCode = 2;
+	DWORD exitCode = 3;
 	while (!((exitCode == 1) || (exitCode == 0) || (exitCode == 2))) {
 		GetExitCodeThread(update, &exitCode);
 		Sleep(100);
