@@ -40,7 +40,7 @@ int WINAPI WinMain(
 	bool result = createWindow(hInstance);
 
 	if (!result)
-		errorMsg("Failed to create window", "We couldn't create the window. Please report this as an issue on the GitHub repository.");
+		MessageBoxW(NULL, L"We couldn't create the window. Please report this as an issue on the GitHub repository.", L"Failed to create window", MB_OK | MB_ICONERROR);
 
 	return 0;
 }

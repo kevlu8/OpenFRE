@@ -63,7 +63,10 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 		return false;
 	}
 
+	EnableWindow(runBtn, FALSE);
+
 	ShowWindow(hwnd, SW_SHOWNORMAL);
+	UpdateWindow(hwnd);
 
 	MSG msg = {};
 	while (GetMessage(&msg, NULL, 0, 0)) {
@@ -91,7 +94,16 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 				DestroyWindow(hwnd);
 			}
 			if (btn == injectBtn) {
-				inject();
+				EnableWindow(exitBtn, FALSE);
+				EnableWindow(injectBtn, FALSE);
+				if (!inject()) {
+					MessageBoxW(hwnd, L"Failed to inject Roblox. Make sure it is opened.", L"Failed to inject", MB_OK | MB_ICONERROR);
+					EnableWindow(injectBtn, TRUE);
+				}
+				else {
+					EnableWindow(runBtn, TRUE);
+				}
+				EnableWindow(exitBtn, TRUE);
 			}
 			if (btn == runBtn) {
 				int codeLength = GetWindowTextLengthW(inputText);
