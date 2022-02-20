@@ -58,7 +58,7 @@ bool inject(_Out_ HANDLE &hThread) {
 	if (!hThread)
 		return false;
 
-	VirtualFreeEx(hProcess, allocatedMemory, NULL, MEM_RELEASE);
 	CloseHandle(hProcess);
+	VirtualFreeEx(hProcess, allocatedMemory, NULL, MEM_RELEASE);
 	return true;
 }

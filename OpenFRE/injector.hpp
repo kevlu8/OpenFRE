@@ -42,4 +42,4 @@ Main function, injects DLL into Roblox memory
 
 @return True if success, false if error.
 */
-bool inject(HANDLE &hThread);
+bool inject(_Out_ HANDLE &hThread);
