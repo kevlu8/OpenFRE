@@ -19,6 +19,7 @@ HWND runBtn = NULL;
 HWND exitBtn = NULL;
 HWND injectBtn = NULL;
 HWND inputText = NULL;
+HANDLE pipe = NULL;
 
 bool createWindow(_In_ HINSTANCE hInstance) {
 
@@ -136,9 +137,9 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 					EnableWindow(runBtn, TRUE);
 				}
 				
-				HANDLE pipe = CreateNamedPipeA("\\\\.\\pipe\\openfrecomms", PIPE_ACCESS_DUPLEX, PIPE_TYPE_MESSAGE, 2, 256, 256, 0, NULL);
+				pipe = CreateNamedPipeA("\\\\.\\pipe\\openfrecomms", PIPE_ACCESS_DUPLEX, PIPE_TYPE_MESSAGE, 2, 8092000, 8092000, 0, NULL);
 
-				if (!pipe)
+				if (pipe == NULL)
 					MessageBoxW(NULL, L"Communication between OpenFRE and Roblox could not be established. Please report this as an issue on the GitHub repository.", L"Failed to establish pipe", MB_OK | MB_ICONERROR);
 
 				EnableWindow(exitBtn, TRUE);
@@ -165,4 +166,8 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 	default:
 		return DefWindowProc(hwnd, msg, wp, lp);
 	}
+}
+
+HANDLE getPipe() {
+	return pipe;
 }

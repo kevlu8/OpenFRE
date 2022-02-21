@@ -30,3 +30,10 @@ Callback for WindowProc
 @param Don't worry about it.
 */
 LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM wp, _In_ LPARAM lp);
+
+/*
+Gets the pipe to OpenFRE.dll
+
+@return The handle to the pipe
+*/
+HANDLE getPipe();

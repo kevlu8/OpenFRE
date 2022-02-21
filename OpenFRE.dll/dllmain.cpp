@@ -15,17 +15,55 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "pch.h"
 #include <lua.hpp>
+#include <string>
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
                      )
 {
+    HANDLE pipe;
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH: {
         MessageBox(NULL, L"DLL successfully injected", L"Injection completed", MB_ICONINFORMATION | MB_OK);
+
+        pipe = CreateFile(L"\\\\.\\pipe\\openfrecomms", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
         
+        while (true) {
+            if (pipe != INVALID_HANDLE_VALUE) break;
+
+            if (GetLastError() != ERROR_PIPE_BUSY) MessageBox(NULL, L"Pipe busy", L"debug", MB_OK | MB_ICONERROR);
+
+            Sleep(100);
+        }
+
+        // pipe is now connected
+        DWORD mode = PIPE_READMODE_MESSAGE, cbRead;
+        BOOL success = SetNamedPipeHandleState(pipe, &mode, NULL, NULL);
+        TCHAR readBuff[BUFSIZ];
+        std::string response = "";
+
+        if (!success)
+            MessageBox(NULL, L"Failed to set pipe", L"debug", MB_OK | MB_ICONINFORMATION);
+
+        success = TransactNamedPipe(pipe, NULL, 0, readBuff, BUFSIZ * sizeof(TCHAR), &cbRead, NULL);
+
+        if (!success && (GetLastError() != ERROR_MORE_DATA))
+            MessageBox(NULL, L"Failed to transact pipe", L"debug", MB_OK | MB_ICONERROR);
+
+        while (true) {
+            if (!success) break;
+
+            success = ReadFile(pipe, readBuff, BUFSIZ * sizeof(TCHAR), &cbRead, NULL);
+
+            if (!success && (GetLastError() != ERROR_MORE_DATA)) break;
+
+            response += (LPCSTR)readBuff;
+        }
+
+        MessageBoxA(NULL, response.c_str(), "res", MB_OK | MB_ICONINFORMATION);
+
         lua_State* luaState;
         luaState = luaL_newstate();
 
