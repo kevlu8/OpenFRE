@@ -23,6 +23,12 @@ HANDLE pipe = NULL;
 
 bool createWindow(_In_ HINSTANCE hInstance) {
 
+	pipe = CreateNamedPipeA("\\\\.\\pipe\\openfrecomms", PIPE_ACCESS_DUPLEX, PIPE_TYPE_MESSAGE, 2, 8092000, 8092000, 0, NULL);
+
+	if (pipe == NULL)
+		MessageBoxW(NULL, L"Communication between OpenFRE and Roblox could not be established. Please report this as an issue on the GitHub repository.", L"Failed to establish pipe", MB_OK | MB_ICONERROR);
+
+
 	WNDCLASS wc = {};
 
 	wc.lpfnWndProc = WindowProcHomemade;
@@ -136,11 +142,6 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 				else {
 					EnableWindow(runBtn, TRUE);
 				}
-				
-				pipe = CreateNamedPipeA("\\\\.\\pipe\\openfrecomms", PIPE_ACCESS_DUPLEX, PIPE_TYPE_MESSAGE, 2, 8092000, 8092000, 0, NULL);
-
-				if (pipe == NULL)
-					MessageBoxW(NULL, L"Communication between OpenFRE and Roblox could not be established. Please report this as an issue on the GitHub repository.", L"Failed to establish pipe", MB_OK | MB_ICONERROR);
 
 				EnableWindow(exitBtn, TRUE);
 			}
@@ -149,8 +150,10 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 				LPWSTR buff = (LPWSTR)VirtualAlloc(NULL, (SIZE_T)codeLength + 1, MEM_COMMIT, PAGE_READWRITE);
 				if (buff != NULL) {
 					GetWindowTextW(inputText, buff, codeLength + 1);
-					// implement so code-run here.
-					MessageBoxW(hwnd, buff, L"Code", MB_OK | MB_ICONINFORMATION);
+					DWORD out;
+					void* thing = &buff;
+					BOOL success = TransactNamedPipe(pipe, thing, codeLength + 1, NULL, 0, &out, NULL);
+					if (!success) MessageBoxW(hwnd, buff, L"Code", MB_OK | MB_ICONINFORMATION);
 				}
 			}
 			return 0;

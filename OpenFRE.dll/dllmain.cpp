@@ -18,78 +18,66 @@
 #include <string>
 
 BOOL APIENTRY DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved
-                     )
+					   DWORD  ul_reason_for_call,
+					   LPVOID lpReserved
+					 )
 {
-    HANDLE pipe;
-    switch (ul_reason_for_call)
-    {
-    case DLL_PROCESS_ATTACH: {
-        MessageBox(NULL, L"DLL successfully injected", L"Injection completed", MB_ICONINFORMATION | MB_OK);
+	HANDLE pipe;
+	switch (ul_reason_for_call)
+	{
+	case DLL_PROCESS_ATTACH: {
+		MSGBOXPARAMS msg = { 0 };
+		msg.cbSize = sizeof(MSGBOXPARAMS);
+		msg.hwndOwner = NULL;
+		msg.hInstance = GetModuleHandle(NULL);
+		msg.lpszText = L"DLL successfully injected";
+		msg.lpszCaption = L"Injection completed";
+		msg.dwStyle = MB_OK | MB_ICONINFORMATION;
+		CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)MessageBoxIndirect, &msg, NULL, 0);
 
-        pipe = CreateFile(L"\\\\.\\pipe\\openfrecomms", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
-        
-        while (true) {
-            if (pipe != INVALID_HANDLE_VALUE) break;
+		while (true) {
+			DWORD mode = PIPE_READMODE_MESSAGE, cbRead;
+			TCHAR readBuff[BUFSIZ];
+			std::string response = "";
+			BOOL success = CallNamedPipe(L"\\\\.\\pipe\\openfrecomms", NULL, 0, readBuff, BUFSIZ * sizeof(TCHAR), &cbRead, 20000);
 
-            if (GetLastError() != ERROR_PIPE_BUSY) MessageBox(NULL, L"Pipe busy", L"debug", MB_OK | MB_ICONERROR);
+			if (success || GetLastError() == ERROR_MORE_DATA) {
+				response += (LPCSTR)readBuff;
 
-            Sleep(100);
-        }
+				if (!success) MessageBox(NULL, L"data lost", L"debug", MB_OK | MB_ICONERROR);
+			}
 
-        // pipe is now connected
-        DWORD mode = PIPE_READMODE_MESSAGE, cbRead;
-        BOOL success = SetNamedPipeHandleState(pipe, &mode, NULL, NULL);
-        TCHAR readBuff[BUFSIZ];
-        std::string response = "";
+			MessageBoxA(NULL, response.c_str(), "res", MB_OK | MB_ICONINFORMATION);
 
-        if (!success)
-            MessageBox(NULL, L"Failed to set pipe", L"debug", MB_OK | MB_ICONINFORMATION);
+			lua_State* luaState;
+			luaState = luaL_newstate();
 
-        success = TransactNamedPipe(pipe, NULL, 0, readBuff, BUFSIZ * sizeof(TCHAR), &cbRead, NULL);
+			static const luaL_Reg lualibs[] = {
+				{ "base", luaopen_base },
+				{ NULL, NULL }
+			};
 
-        if (!success && (GetLastError() != ERROR_MORE_DATA))
-            MessageBox(NULL, L"Failed to transact pipe", L"debug", MB_OK | MB_ICONERROR);
+			const luaL_Reg* lib = lualibs;
+			while (lib->func != NULL) {
+				lib->func(luaState);
+				lua_settop(luaState, 0);
+				lib++;
+			}
 
-        while (true) {
-            if (!success) break;
+			luaL_dostring(luaState, "print(\"Hello, world!\")");
 
-            success = ReadFile(pipe, readBuff, BUFSIZ * sizeof(TCHAR), &cbRead, NULL);
+			lua_close(luaState);
 
-            if (!success && (GetLastError() != ERROR_MORE_DATA)) break;
+			Sleep(100);
+		}
 
-            response += (LPCSTR)readBuff;
-        }
-
-        MessageBoxA(NULL, response.c_str(), "res", MB_OK | MB_ICONINFORMATION);
-
-        lua_State* luaState;
-        luaState = luaL_newstate();
-
-        static const luaL_Reg lualibs[] = {
-            { "base", luaopen_base },
-            { NULL, NULL }
-        };
-
-        const luaL_Reg* lib = lualibs;
-        while (lib->func != NULL) {
-            lib->func(luaState);
-            lua_settop(luaState, 0);
-            lib++;
-        }
-
-        luaL_dostring(luaState, "print(\"Hello, world!\")");
-
-        lua_close(luaState);
-
-        break;
-    
-    }
-    case DLL_THREAD_ATTACH:
-    case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH:
-        break;
-    }
-    return TRUE;
+		break;
+	
+	}
+	case DLL_THREAD_ATTACH:
+	case DLL_THREAD_DETACH:
+	case DLL_PROCESS_DETACH:
+		break;
+	}
+	return TRUE;
 }

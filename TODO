@@ -4,4 +4,4 @@
 	- Make markdown syntax
 - Display loading bar on startup
 - Somehow get communication between main executable and DLL (pipe??)
-- Fix "An unexpected error occured and Roblox needs to quit" / freezing on inject
+- Make OpenFRE.dll close when Roblox closes
