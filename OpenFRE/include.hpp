@@ -28,3 +28,5 @@
 #include <cpr/cpr.h>
 #include <map>
 #include <lua.hpp>
+#include <Richedit.h>
+#include <CommCtrl.h>
