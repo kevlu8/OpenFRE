@@ -57,6 +57,24 @@ BEGIN
     END
 END
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_WINDOWMENU MENUEX
+BEGIN
+    POPUP "File",                           65535,MFT_STRING,MFS_ENABLED
+    BEGIN
+        MENUITEM "Exit",                        ID_FILE_EXIT,MFT_STRING | MFT_RIGHTJUSTIFY,MFS_ENABLED
+    END
+    POPUP "?",                              65535,MFT_STRING,MFS_ENABLED
+    BEGIN
+        MENUITEM "About",                       ID__ABOUT,MFT_STRING,MFS_GRAYED
+    END
+END
+
 #endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 

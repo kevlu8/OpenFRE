@@ -76,6 +76,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>OpenFRE</TargetName>
+    <IncludePath>C:\vcpkg\installed\x86-windows-static\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\vcpkg\installed\x86-windows-static\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
