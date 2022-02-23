@@ -205,7 +205,7 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 					EnableWindow(exitBtn, FALSE);
 					EnableWindow(injectBtn, FALSE);
 					HANDLE dllProc = NULL;
-					bool injected = false;
+					bool injected = true;
 					if (!inject(dllProc)) {
 						MessageBoxW(hwnd, L"Failed to inject code into Roblox. Please make sure it is open.", L"Failed to inject", MB_OK | MB_ICONERROR);
 						EnableWindow(injectBtn, TRUE);
