@@ -1,7 +1,8 @@
-- (Learn how to) Make working execution system
-- Touch up GUI
-	- Make keyboard shortcuts work in textbox: eg ctrl+c, ctrl+v, ctrl+a, ctrl+backspace
-	- Make markdown syntax
-- Display loading bar on startup
-- Somehow get communication between main executable and DLL (pipe??)
-- Make OpenFRE.dll close when Roblox closes
+- (Learn how to) Make working execution system								|
+- Touch up GUI												|
+	- Make keyboard shortcuts work in textbox: eg ctrl+c, ctrl+v, ctrl+a, ctrl+backspace		| DONE
+	- Make markdown syntax										|
+	- Autocompletion										| PARTIALLY DONE
+- Display loading bar on startup									|
+- Somehow get communication between main executable and DLL (pipe??)					|
+- Make OpenFRE.dll close when Roblox closes								|
