@@ -1,9 +1,9 @@
 #include "utils.hpp"
 
 DWORD updateProgram() {
-	remove("openfre-updater.exe");
 	cpr::Response response = cpr::Get(cpr::Url{ "https://api.github.com/repos/kevlu8/OpenFRE/releases/latest" });
 	if (response.status_code == 200) {
+		remove("openfre-updater.exe");
 		std::string latest_version = response.text;
 		if (latest_version.find("\"tag_name\":\"v") != std::string::npos) {
 			latest_version = latest_version.substr(latest_version.find("\"tag_name\":\"v") + 12);
