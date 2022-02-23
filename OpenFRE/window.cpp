@@ -20,8 +20,12 @@ HWND exitBtn = NULL;
 HWND injectBtn = NULL;
 HWND inputText = NULL;
 HANDLE pipe = NULL;
+HMENU menu = NULL;
+HINSTANCE curInstance = NULL;
 
 bool createWindow(_In_ HINSTANCE hInstance) {
+
+	curInstance = hInstance;
 
 	pipe = CreateNamedPipeA("\\\\.\\pipe\\openfrecomms", PIPE_ACCESS_DUPLEX, PIPE_TYPE_MESSAGE, 2, 8092000, 8092000, 0, NULL);
 
@@ -30,6 +34,11 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 		return false;
 	}
 	WNDCLASS wc = {};
+
+	menu = LoadMenuW(hInstance, MAKEINTRESOURCEW(IDR_WINDOWMENU));
+	if (menu == NULL || menu == INVALID_HANDLE_VALUE) {
+		return false;
+	}
 
 	wc.lpfnWndProc = WindowProcHomemade;
 	wc.hInstance = hInstance;
@@ -51,9 +60,9 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 		L"OpenFRE Script Injector",
 		L"OpenFRE Executor",
 		WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | BS_DEFPUSHBUTTON,
-		CW_USEDEFAULT, CW_USEDEFAULT, 600, 300,
+		CW_USEDEFAULT, CW_USEDEFAULT, 600, 320,
 		NULL,
-		NULL,
+		menu,
 		hInstance,
 		NULL
 	);
@@ -85,6 +94,8 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 
 	ShowWindow(hwnd, SW_SHOWNORMAL);
 	UpdateWindow(hwnd);
+
+	textColorization();
 
 	MSG msg = {};
 	while (GetMessage(&msg, NULL, 0, 0)) {
@@ -173,40 +184,49 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 		return 0;
 	}
 	case WM_COMMAND: {
-		switch (HIWORD(wp)) {
-		case BN_CLICKED: {
-			HWND btn = (HWND)lp;
-			if (btn == exitBtn) {
-				DestroyWindow(hwnd);
-			}
-			if (btn == injectBtn) {
-				EnableWindow(exitBtn, FALSE);
-				EnableWindow(injectBtn, FALSE);
-				HANDLE dllProc = NULL;
-				bool injected = false;
-				if (!inject(dllProc)) {
-					MessageBoxW(hwnd, L"Failed to inject code into Roblox. Please make sure it is open.", L"Failed to inject", MB_OK | MB_ICONERROR);
-					EnableWindow(injectBtn, TRUE);
+		switch (LOWORD(wp)) {
+		case ID_FILE_EXIT: {
+			DestroyWindow(hwnd);
+			return 0;
+		}
+		case ID__ABOUT: {
+			// Not implemented yet.
+			return 0;
+		}
+		default:
+			switch (HIWORD(wp)) {
+			case BN_CLICKED: {
+				HWND btn = (HWND)lp;
+				if (btn == exitBtn) {
+					DestroyWindow(hwnd);
 				}
-				else {
-					if (!pipe) {
-						MessageBoxW(NULL, L"Communication between OpenFRE and Roblox could not be established. Please report this as an issue on the GitHub repository.", L"Failed to establish pipe", MB_OK | MB_ICONERROR);
-						injected = false;
+				if (btn == injectBtn) {
+					EnableMenuItem(GetSubMenu(menu, 0), ID_FILE_EXIT, MF_DISABLED);
+					EnableWindow(exitBtn, FALSE);
+					EnableWindow(injectBtn, FALSE);
+					HANDLE dllProc = NULL;
+					bool injected = false;
+					if (!inject(dllProc)) {
+						MessageBoxW(hwnd, L"Failed to inject code into Roblox. Please make sure it is open.", L"Failed to inject", MB_OK | MB_ICONERROR);
+						EnableWindow(injectBtn, TRUE);
 					}
+					else {
+						if (!pipe) {
+							MessageBoxW(hwnd, L"Communication between OpenFRE and Roblox could not be established. Please report this as an issue on the GitHub repository.", L"Failed to establish pipe", MB_OK | MB_ICONERROR);
+							injected = false;
+						}
+					}
+					if (injected) {
+						EnableWindow(runBtn, TRUE);
+					}
+					else {
+						EnableWindow(injectBtn, TRUE);
+					}
+
+					EnableMenuItem(GetSubMenu(menu, 0), ID_FILE_EXIT, MF_ENABLED);
+					EnableWindow(exitBtn, TRUE);
 				}
-				if (injected) {
-					EnableWindow(runBtn, TRUE);
-				}
-				else {
-					EnableWindow(injectBtn, TRUE);
-				}
-				
-				EnableWindow(exitBtn, TRUE);
-			}
-			if (btn == runBtn) {
-				int codeLength = GetWindowTextLengthW(inputText);
-				LPWSTR buff = (LPWSTR)VirtualAlloc(NULL, (SIZE_T)codeLength + 1, MEM_COMMIT, PAGE_READWRITE);
-				if (buff != NULL) {
+				if (btn == runBtn) {
 					int codeLength = GetWindowTextLengthW(inputText);
 					LPWSTR buff = (LPWSTR)VirtualAlloc(NULL, (SIZE_T)codeLength + 1, MEM_COMMIT, PAGE_READWRITE);
 					if (buff != NULL) {
@@ -217,21 +237,22 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 						if (!success) MessageBoxW(hwnd, buff, L"Code", MB_OK | MB_ICONINFORMATION);
 					}
 				}
+				return 0;
+			}
+			case EN_CHANGE: {
+				HWND tb = (HWND)lp;
+				if (tb == inputText) {
+					textColorization();
+				}
+				return 0;
+			}
+			default:
+				return 0;
 			}
 			return 0;
 		}
-		case EN_CHANGE: {
-			HWND tb = (HWND)lp;
-			if (tb == inputText) {
-				textColorization();
-			}
-			return 0;
-		}
-		default:
-			break;
-		}
-		return 0;
 	}
+		
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
