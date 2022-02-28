@@ -2,7 +2,6 @@
 
 Hello! Welcome to the beta version of OpenFRE.
 
-Here is the key (make sure to keep the direct capitalization):
-```
-OpenFREBeta
-```
+Currently, injection works, however execution does not.
+
+Feel free to contribute at [the repo](https://github.com/kevlu8/OpenFRE)!
