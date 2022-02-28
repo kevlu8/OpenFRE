@@ -33,6 +33,7 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 		MessageBoxW(NULL, L"Communication between OpenFRE and Roblox could not be established. Please report this as an issue on the GitHub repository.", L"Failed to establish pipe", MB_OK | MB_ICONERROR);
 		return false;
 	}
+
 	WNDCLASS wc = {};
 
 	menu = LoadMenuW(hInstance, MAKEINTRESOURCEW(IDR_WINDOWMENU));
@@ -66,8 +67,9 @@ bool createWindow(_In_ HINSTANCE hInstance) {
 		hInstance,
 		NULL
 	);
+
 	HMODULE dll = LoadLibraryW(L"Msftedit.dll");
-	if(dll == NULL) {
+	if (dll == NULL) {
 		return false;
 	}
 	if (hwnd == NULL) {
@@ -191,6 +193,7 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 		}
 		case ID__ABOUT: {
 			// Not implemented yet.
+			ShellExecuteA(NULL, "open", "https://github.com/kevlu8/OpenFRE", NULL, NULL, SW_HIDE);
 			return 0;
 		}
 		default:
@@ -234,7 +237,7 @@ LRESULT CALLBACK WindowProcHomemade(_In_ HWND hwnd, _In_ UINT msg, _In_ WPARAM w
 						DWORD out;
 						void* thing = &buff;
 						BOOL success = TransactNamedPipe(pipe, thing, codeLength + 1, NULL, 0, &out, NULL);
-						if (!success) MessageBoxW(hwnd, buff, L"Code", MB_OK | MB_ICONINFORMATION);
+						if (!success) MessageBoxW(hwnd, buff, L"Code", MB_OK | MB_ICONINFORMATION); // currently diong this
 					}
 				}
 				return 0;

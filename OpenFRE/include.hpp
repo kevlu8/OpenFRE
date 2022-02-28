@@ -15,7 +15,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
-#define OPENFRE_VERSION "0.1.0"
+#define OPENFRE_VERSION "0.1.1"
 
 #include <Windows.h>
 #include <Windowsx.h>
