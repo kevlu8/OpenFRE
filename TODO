@@ -1,9 +1,10 @@
-- (Learn how to) Make working execution system								|
+- (Learn how to) Make working execution system (+ SECURITY)						|
 - Touch up GUI												|
 	- Make keyboard shortcuts work in textbox: eg ctrl+c, ctrl+v, ctrl+a, ctrl+backspace		| DONE
 	- Make markdown coloring									| PARTIALLY DONE
 	- Autocompletion										| PARTIALLY DONE
 	- Fix text coloring being weird									| 
+	- Make font Cascadia										| 
 - Display loading bar on startup									|
 - Somehow get communication between main executable and DLL (pipe??)					|
 - Make OpenFRE.dll close when Roblox closes								|
